@@ -8,7 +8,7 @@
   const EMOJIS = ['❤️', '🙏', '🔥', '👏', '😊'];
   const $ = (s) => document.querySelector(s);
   const app = $('#app');
-  const estado = { papel: 'visitante', aba: 'mural', tipoGaleria: 'foto', pasta: null, cifra: null };
+  const estado = { papel: 'visitante', aba: 'mural', secaoAbba: 'repertorio', tipoGaleria: 'foto', pasta: null, cifra: null };
 
   // ---------- utilitários ----------
   function h(tag, props, ...filhos) {
@@ -268,7 +268,16 @@
     if (estado.cifra) return viewCifra(estado.cifra);
     if (estado.pasta) return viewPasta(estado.pasta);
 
-    const raiz = h('div', {}, h('h1', {}, 'Abba Musical'), h('p', { class: 'mudo' }, 'Pastas de repertório.'));
+    // Duas seções dentro do Abba Musical: Repertório e Afinador
+    const abas = h('div', { class: 'abas' }, [['repertorio', 'Repertório', 'abba'], ['afinador', 'Afinador', 'abba/afinador']].map(([s, nome, hash]) =>
+      h('button', { class: estado.secaoAbba === s ? 'ativo' : '', onclick: () => { location.hash = hash; } }, nome)));
+    if (estado.secaoAbba === 'afinador') {
+      return h('div', {}, h('h1', {}, 'Abba Musical'), abas,
+        window.Afinador ? window.Afinador.montar()
+          : h('div', { class: 'card' }, 'Feche e abra o site de novo para ativar o afinador.'));
+    }
+
+    const raiz = h('div', {}, h('h1', {}, 'Abba Musical'), abas, h('p', { class: 'mudo' }, 'Pastas de repertório.'));
     if (is('musical')) {
       const erro = h('p', { class: 'erro' });
       const form = h('form', {},
@@ -633,6 +642,7 @@
 
   // ---------- roteamento ----------
   async function renderizar() {
+    if (window.Afinador) window.Afinador.parar(); // desliga o microfone ao sair da tela do afinador
     atualizarTopo();
     if (estado.aba !== 'abba') { estado.pasta = null; estado.cifra = null; }
     if (!estado.cifra) estado.editando = false;
@@ -658,7 +668,9 @@
       if (m) abrirMidia(m);
       return;
     }
-    estado.aba = ['mural', 'abba', 'galeria'].includes(hash) ? hash : 'mural';
+    const [base, sub] = hash.split('/');
+    estado.aba = ['mural', 'abba', 'galeria'].includes(base) ? base : 'mural';
+    estado.secaoAbba = estado.aba === 'abba' && sub === 'afinador' ? 'afinador' : 'repertorio';
     estado.pasta = null; estado.cifra = null;
     renderizar();
   }

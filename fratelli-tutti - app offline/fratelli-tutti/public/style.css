@@ -219,3 +219,47 @@ dialog h2 { font-family: var(--serifa); }
   .quem { flex: 1; text-align: center; font-size: .8rem; }
   main { padding: 16px 12px 70px; }
 }
+
+/* Afinador */
+.afin-opcoes { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+.afin-rotulo { display: flex; flex-direction: column; gap: 4px; flex: 1 1 200px; font-size: .85rem; color: var(--mudo); }
+.afin-a4-caixa { display: flex; align-items: center; gap: 6px; }
+.afin-a4-caixa button { min-width: 38px; font-weight: 700; }
+.afin-a4 { min-width: 7.5em; text-align: center; font-family: var(--serifa); }
+.afin-painel {
+  text-align: center; padding: 18px 14px 14px; border-radius: 14px;
+  background: var(--card); border: 1px solid var(--borda); border-top: 3px solid var(--ouro);
+  box-shadow: var(--sombra);
+}
+.afin-nota { font-family: var(--serifa); font-size: 4.4rem; line-height: 1; font-weight: 700; color: var(--mudo); transition: color .2s; }
+.afin-pt { font-size: 1rem; color: var(--mudo); min-height: 1.5em; }
+.medidor {
+  position: relative; height: 34px; margin: 16px 6px 4px; border-radius: 99px;
+  background-color: var(--bg2); border: 1px solid var(--borda);
+  background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(10% - 1px), var(--borda) calc(10% - 1px), var(--borda) 10%);
+}
+.medidor-centro { position: absolute; left: 45%; width: 10%; top: 0; bottom: 0; background: var(--ouro); opacity: .28; }
+.medidor-ponteiro {
+  position: absolute; top: -5px; bottom: -5px; width: 6px; margin-left: -3px; border-radius: 3px;
+  background: var(--mudo); transition: left .12s linear, background .2s;
+}
+.medidor-escala { display: flex; justify-content: space-between; padding: 2px 8px; font-size: .75rem; color: var(--mudo); }
+.afin-cents { margin-top: 6px; font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.afin-dica { min-height: 1.7em; font-family: var(--serifa); font-size: 1.15rem; }
+.afin-hz { min-height: 1.3em; font-size: .85rem; color: var(--mudo); }
+.afin-painel.afinado .afin-nota, .afin-painel.afinado .afin-dica { color: var(--ouro); }
+.afin-painel.afinado .medidor-ponteiro { background: var(--ouro); box-shadow: 0 0 10px var(--ouro); }
+.afin-painel.afinado { border-color: var(--ouro); }
+.afin-painel.quase .afin-nota, .afin-painel.quase .afin-dica { color: var(--rosa); }
+.afin-painel.quase .medidor-ponteiro { background: var(--rosa); }
+.afin-painel.longe .afin-nota, .afin-painel.longe .afin-dica { color: var(--carmim); }
+.afin-painel.longe .medidor-ponteiro { background: var(--carmim); }
+.afin-cordas { display: grid; grid-template-columns: repeat(auto-fit, minmax(58px, 1fr)); gap: 8px; margin: 14px 0; }
+.afin-corda { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; line-height: 1.25; }
+.afin-corda b { font-family: var(--serifa); font-size: 1.3rem; }
+.afin-corda .num, .afin-corda small { font-size: .7rem; color: var(--mudo); }
+.afin-corda.ativo { background: var(--primario); color: var(--primario-texto); border-color: var(--primario); }
+.afin-corda.ativo .num, .afin-corda.ativo small { color: inherit; opacity: .85; }
+.afin-corda.detectada { border-color: var(--ouro); box-shadow: inset 0 0 0 2px var(--ouro); }
+.afin-acoes { margin-bottom: 8px; }
+@media (prefers-reduced-motion: reduce) { .medidor-ponteiro, .afin-nota { transition: none; } }
