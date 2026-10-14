@@ -345,14 +345,157 @@
     return h('div', { class: 'card' }, form);
   }
 
+  // ---------- Transposição de cifras ----------
+  const NOTAS_S = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const NOTAS_B = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+  const BASE_NOTA = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  const TONS_BEMOL = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm']);
+  const RE_ACORDE = /^[A-G][#b]?(?:m(?!aj)|min|maj|M|dim|aug|sus|add|°|º|ø|\+|-|\d+|[#b]\d+|\([^)]*\))*(?:\/[A-G][#b]?)?$/;
+  const RE_NEUTRO = /^(\|+|\/|-+|%|\(?x\d+\)?|\(?\d+x\)?|N\.?C\.?)$/i;
+
+  function indiceNota(r) {
+    let i = BASE_NOTA[r[0]];
+    if (r[1] === '#') i += 1;
+    else if (r[1] === 'b') i -= 1;
+    return ((i % 12) + 12) % 12;
+  }
+
+  function transporAcorde(tok, n, bemois) {
+    const m = /^([A-G][#b]?)(.*?)(?:\/([A-G][#b]?))?$/.exec(tok);
+    if (!m) return tok;
+    const tab = bemois ? NOTAS_B : NOTAS_S;
+    const nome = (r) => tab[(indiceNota(r) + n + 120) % 12];
+    return nome(m[1]) + m[2] + (m[3] ? '/' + nome(m[3]) : '');
+  }
+
+  // A cifra já usa bemóis? Só olha acordes de verdade (linhas de acordes e [colchetes]),
+  // para não confundir palavras da letra como "Abençoa" com o acorde Ab.
+  function temBemol(texto) {
+    const bemol = (p) => RE_ACORDE.test(p) && /(^|\/)[A-G]b/.test(p);
+    return String(texto || '').split('\n').some((l) => (ehLinhaDeAcordes(l)
+      ? l.trim().split(/\s+/).some(bemol)
+      : [...l.matchAll(/\[([^\]\s]+)\]/g)].some((m) => bemol(m[1]))));
+  }
+
+  // Decide se o tom de destino se escreve com bemóis (Bb, Eb...) ou sustenidos (F#, C#...)
+  function usaBemois(tom, n, texto) {
+    const t = (tom || '').trim();
+    const m = /^([A-G][#b]?)(m(?!aj))?/.exec(t);
+    if (m && RE_ACORDE.test(t)) {
+      const raiz = NOTAS_B[(indiceNota(m[1]) + n + 120) % 12];
+      // Gb e F# valem o mesmo: fica F#, a menos que a cifra já use bemóis
+      if (raiz === 'Gb' && !m[2]) return /^[A-G]b/.test(t) || temBemol(texto);
+      return TONS_BEMOL.has(raiz + (m[2] ? 'm' : ''));
+    }
+    return temBemol(texto);
+  }
+
+  function ehLinhaDeAcordes(linha) {
+    const toks = linha.trim().split(/\s+/).filter(Boolean);
+    if (!toks.length) return false;
+    let acordes = 0;
+    for (let i = 0; i < toks.length; i++) {
+      const t = toks[i];
+      if (RE_ACORDE.test(t)) acordes++;
+      else if (RE_NEUTRO.test(t) || (i === 0 && /^\S+:$/.test(t))) continue;
+      else return false;
+    }
+    return acordes > 0;
+  }
+
+  // Troca os acordes mantendo o alinhamento com a letra
+  function transporLinhaAcordes(linha, n, bemois) {
+    let divida = 0;
+    return linha.split(/(\s+)/).map((p) => {
+      if (!p) return p;
+      if (/^\s+$/.test(p)) {
+        if (divida > 0) {
+          const tira = Math.min(divida, Math.max(p.length - 1, 0));
+          divida -= tira;
+          return p.slice(tira);
+        }
+        if (divida < 0) {
+          const r = p + ' '.repeat(-divida);
+          divida = 0;
+          return r;
+        }
+        return p;
+      }
+      if (RE_ACORDE.test(p)) {
+        const novo = transporAcorde(p, n, bemois);
+        divida += novo.length - p.length;
+        return novo;
+      }
+      return p;
+    }).join('');
+  }
+
+  function transporTexto(texto, n, bemois) {
+    if (!n) return texto;
+    return texto.split('\n').map((l) => (ehLinhaDeAcordes(l)
+      ? transporLinhaAcordes(l, n, bemois)
+      : l.replace(/\[([^\]\s]+)\]/g, (m, c) => (RE_ACORDE.test(c) ? `[${transporAcorde(c, n, bemois)}]` : m)))
+    ).join('\n');
+  }
+
   async function viewCifra(id) {
     const c = await api('/api/cifras/' + id);
     const voltar = h('button', { class: 'link', onclick: () => { estado.cifra = null; renderizar(); } }, '← ' + (estado.pasta ? estado.pasta.nome : 'Pastas'));
     if (estado.editando) return h('div', {}, voltar, formCifra(c.pasta_id, c));
+
+    if (estado.transpId !== id) { estado.transpId = id; estado.transp = 0; }
+    const tomOrig = (c.tom || '').trim();
+    const tomOk = RE_ACORDE.test(tomOrig);
+    const pre = h('pre', { class: 'cifra' });
+    const tomAtual = h('strong', { class: 'tom-atual' });
+    const btnOriginal = h('button', { onclick: () => ir(0) }, 'Original');
+    const btnSalvar = h('button', { class: 'primario', onclick: async () => {
+      if (!confirm('Salvar a cifra neste tom para todos os músicos?')) return;
+      const n = estado.transp;
+      const bem = usaBemois(tomOrig, n, c.texto);
+      await api('/api/cifras/' + c.id, { method: 'PUT', json: {
+        titulo: c.titulo, artista: c.artista,
+        tom: tomOk ? transporAcorde(tomOrig, n, bem) : c.tom,
+        texto: transporTexto(c.texto, n, bem),
+      } });
+      estado.transp = 0;
+      renderizar();
+    } }, 'Salvar neste tom');
+    const seletor = tomOk ? h('select', { 'aria-label': 'Escolher o tom', onchange: (e) => ir(Number(e.target.value)) },
+      Array.from({ length: 12 }, (_, i) => h('option', { value: i },
+        transporAcorde(tomOrig, i, usaBemois(tomOrig, i, c.texto)) + (i === 0 ? ' (original)' : '')))) : null;
+
+    function pintar() {
+      const n = estado.transp;
+      const bem = usaBemois(tomOrig, n, c.texto);
+      const texto = transporTexto(c.texto, n, bem);
+      // Linhas só de acordes ficam coloridas; acordes entre [colchetes] no meio da letra também
+      pre.replaceChildren(...texto.split('\n').map((l) => {
+        if (ehLinhaDeAcordes(l)) return h('span', { class: 'acorde' }, l + '\n');
+        const partes = l.split(/(\[[^\]\s]+\])/).map((p) =>
+          (/^\[.+\]$/.test(p) && RE_ACORDE.test(p.slice(1, -1)) ? h('span', { class: 'acorde' }, p) : p));
+        return h('span', {}, ...partes, '\n');
+      }));
+      tomAtual.textContent = tomOk ? transporAcorde(tomOrig, n, bem) : (n ? `${n > 6 ? n - 12 : '+' + n} meio-tom` : 'original');
+      if (seletor) seletor.value = String(n);
+      btnOriginal.hidden = n === 0;
+      btnSalvar.hidden = n === 0 || !is('musical');
+    }
+    function ir(v) { estado.transp = ((v % 12) + 12) % 12; pintar(); }
+
+    const barra = h('div', { class: 'tom' },
+      h('span', { class: 'mudo' }, 'Tom'),
+      h('button', { 'aria-label': 'Descer meio tom', onclick: () => ir(estado.transp - 1) }, '−'),
+      tomAtual,
+      h('button', { 'aria-label': 'Subir meio tom', onclick: () => ir(estado.transp + 1) }, '+'),
+      seletor, btnOriginal, btnSalvar);
+    pintar();
+
     return h('div', {}, voltar,
       h('h1', { style: 'margin-top:8px' }, c.titulo),
-      h('p', { class: 'mudo' }, [c.artista, c.tom && `Tom: ${c.tom}`].filter(Boolean).join(' · ')),
-      h('pre', { class: 'cifra' }, c.texto),
+      h('p', { class: 'mudo' }, [c.artista, tomOrig && `Tom original: ${tomOrig}`].filter(Boolean).join(' · ')),
+      barra,
+      pre,
       h('div', { class: 'linha' },
         is('musical') && h('button', { onclick: () => { estado.editando = true; renderizar(); } }, 'Editar'),
         is('musical', 'coordenacao') && h('button', { class: 'perigo', onclick: async () => {

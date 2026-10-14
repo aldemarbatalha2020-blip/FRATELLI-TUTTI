@@ -1,8 +1,8 @@
-const VERSAO = 'v1';
+const VERSAO = 'v3';
 const SHELL = 'ft-shell-' + VERSAO;
 const API = 'ft-api-v1';
 const MIDIA = 'ft-media-v1';
-const ARQUIVOS = ['/index.html', '/style.css', '/app.js', '/manifest.webmanifest', '/icon.svg', '/icon-192.png', '/icon-512.png'];
+const ARQUIVOS = ['/index.html', '/style.css', '/app.js', '/manifest.webmanifest', '/emblema.svg', '/icon.svg', '/icon-192.png', '/icon-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(ARQUIVOS)).then(() => self.skipWaiting()));

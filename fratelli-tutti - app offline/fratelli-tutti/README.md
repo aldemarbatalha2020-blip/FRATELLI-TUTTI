@@ -18,6 +18,14 @@ Projeto independente, sem qualquer ligação com outros sites.
 | Equipe musical | `CHAVE_MUSICAL` | criar pastas; adicionar e editar cifras |
 | Equipe de produção | `CHAVE_PRODUCAO` | ver avisos e repertórios (sem editar); enviar fotos e vídeos |
 
+## Troca de tom nas cifras
+
+Ao abrir uma cifra, há uma barra com − / + (meio tom), um seletor com os 12 tons e o botão "Original". Os acordes são trocados mantendo o alinhamento sobre a letra, inclusive acordes com baixo (D/F#), sétimas, sus e acordes entre colchetes no meio da letra ([Am]). O site escolhe bemóis ou sustenidos conforme o tom de destino. Funciona offline. A equipe musical pode usar "Salvar neste tom" para gravar a cifra transposta para todos.
+
+## Identidade visual
+
+Só cores, formas e tipografia (sem nomes nem brasões): dourado e marfim (Vaticano), azul profundo (Francisco e devoção mariana de João Paulo II), carmim dos mártires (São Tarcísio) e rosa suave (Santa Cecília). Temas: claro, escuro e padrão do sistema.
+
 ## Uso offline
 
 O site é um aplicativo instalável (PWA). Na primeira visita com internet ele guarda no aparelho:
