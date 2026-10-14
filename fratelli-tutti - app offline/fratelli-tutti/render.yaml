@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: fratelli-tutti
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /saude
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fratelli-tutti-db
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+      # Defina estas três chaves no painel do Render (uma para cada equipe)
+      - key: CHAVE_COORDENACAO
+        sync: false
+      - key: CHAVE_MUSICAL
+        sync: false
+      - key: CHAVE_PRODUCAO
+        sync: false
+
+databases:
+  - name: fratelli-tutti-db
+    plan: free
+    databaseName: fratelli
+    user: fratelli

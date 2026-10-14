@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fratelli Tutti</title>
+  <meta name="theme-color" content="#8a2b2b">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca">Fratelli Tutti</div>
+    <nav id="menu">
+      <button data-aba="mural">Mural</button>
+      <button data-aba="abba">Abba Musical</button>
+      <button data-aba="galeria">Galeria</button>
+    </nav>
+    <div class="acoes">
+      <select id="tema" aria-label="Tema">
+        <option value="sistema">Padrão do sistema</option>
+        <option value="claro">Claro</option>
+        <option value="escuro">Escuro</option>
+      </select>
+      <span id="rede" class="rede" hidden></span>
+      <span id="quem" class="quem"></span>
+      <button id="btnEntrar" class="primario">Entrar</button>
+    </div>
+  </header>
+
+  <main id="app"></main>
+  <div id="toast" class="toast" hidden></div>
+
+  <dialog id="dlgLogin">
+    <form method="dialog" id="formLogin">
+      <h2>Entrar</h2>
+      <p class="mudo">Digite a chave de acesso da sua equipe.</p>
+      <input id="chave" type="password" placeholder="Chave de acesso" autocomplete="off" required>
+      <p id="erroLogin" class="erro"></p>
+      <div class="linha">
+        <button type="button" id="cancelarLogin">Cancelar</button>
+        <button type="submit" class="primario">Entrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dlgMidia" class="grande"></dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>
