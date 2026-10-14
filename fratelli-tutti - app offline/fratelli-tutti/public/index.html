@@ -6,11 +6,35 @@
   <title>Fratelli Tutti</title>
   <meta name="theme-color" content="#1f3c68">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
+  <!-- Capa de abertura: aparece uma vez por visita; some sozinha ou ao tocar -->
+  <div id="capa" class="capa" role="dialog" aria-label="Fratelli Tutti">
+    <img class="capa-logo" src="/logo.png" width="947" height="948" alt="Logotipo do Ministério Fratelli Tutti">
+    <p class="capa-dica">Toque para entrar</p>
+  </div>
+  <script>
+    (function () {
+      var capa = document.getElementById('capa');
+      if (!capa) return;
+      try { if (sessionStorage.getItem('ft_capa') === '1') { capa.remove(); return; } } catch (e) { /* mostra a capa */ }
+      var fechada = false;
+      function fechar() {
+        if (fechada) return;
+        fechada = true;
+        try { sessionStorage.setItem('ft_capa', '1'); } catch (e) { /* ok */ }
+        capa.classList.add('saindo');
+        setTimeout(function () { capa.remove(); }, 700);
+      }
+      capa.addEventListener('click', fechar);
+      document.addEventListener('keydown', fechar);
+      setTimeout(fechar, 2800);
+    })();
+  </script>
+
   <header class="topo">
     <div class="marca">Fratelli Tutti</div>
     <nav id="menu">
@@ -35,7 +59,7 @@
 
   <dialog id="dlgLogin">
     <form method="dialog" id="formLogin">
-      <img class="emblema" src="/emblema.svg" alt="">
+      <img class="emblema" src="/logo.png" width="92" height="92" alt="Logotipo do Ministério Fratelli Tutti">
       <h2>Entrar</h2>
       <p class="mudo">Digite a chave de acesso da sua equipe.</p>
       <input id="chave" type="password" placeholder="Chave de acesso" autocomplete="off" required>

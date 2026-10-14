@@ -18,6 +18,10 @@ Projeto independente, sem qualquer ligação com outros sites.
 | Equipe musical | `CHAVE_MUSICAL` | criar pastas; adicionar e editar cifras |
 | Equipe de produção | `CHAVE_PRODUCAO` | ver avisos e repertórios (sem editar); enviar fotos e vídeos |
 
+## Capa e logotipo
+
+O logotipo do ministério (`public/logo.png`, recortado em círculo com fundo transparente) aparece numa capa de abertura em azul profundo, uma vez por visita: some sozinha em cerca de 3 segundos ou ao tocar. Também está no login e nos ícones do aplicativo (`icon-192.png`, `icon-512.png`, `apple-touch-icon.png`), que no celular viram a tela de abertura do app instalado. A capa funciona offline.
+
 ## Troca de tom nas cifras
 
 Ao abrir uma cifra, há uma barra com − / + (meio tom), um seletor com os 12 tons e o botão "Original". Os acordes são trocados mantendo o alinhamento sobre a letra, inclusive acordes com baixo (D/F#), sétimas, sus e acordes entre colchetes no meio da letra ([Am]). O site escolhe bemóis ou sustenidos conforme o tom de destino. Funciona offline. A equipe musical pode usar "Salvar neste tom" para gravar a cifra transposta para todos.
